@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('./partials/head') %>
+    <title>Add New Blog</title>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+
+    <div class="container mt-4" style="max-width: 800px;">
+      <form action="/blog" method="post" enctype="multipart/form-data">
+        <h2 class="text-center mb-4">Create a New Post</h2>
+        <div class="mb-3">
+          <label for="coverImage" class="form-label">Cover Image</label>
+          <input
+            type="file"
+            class="form-control"
+            id="coverImage"
+            name="coverImage"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="title" class="form-label">Title</label>
+          <input
+            type="text"
+            class="form-control"
+            id="title"
+            name="title"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="body" class="form-label">Body</label>
+          <input type="hidden" name="body">
+          <div id="editor" style="min-height: 200px;">
+            <p>Write your story here...</p>
+          </div>
+        </div>
+        <div class="mb-3">
+          <button class="btn btn-primary w-100" type="submit">Publish Post</button>
+        </div>
+      </form>
+    </div>
+
+    <%- include('./partials/footer.ejs') %>
+    <%- include('./partials/script.ejs') %>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+      var quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link', 'image'],
+                ['clean']
+            ]
+        }
+      });
+      
+      var form = document.querySelector('form');
+      form.onsubmit = function() {
+        var bodyInput = document.querySelector('input[name=body]');
+        bodyInput.value = quill.root.innerHTML;
+      };
+    </script>
+  </body>
+</html>
