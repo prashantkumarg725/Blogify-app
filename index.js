@@ -1,21 +1,22 @@
-require("dotenv").config();
-
-const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
-const cookieParser = require("cookie-parser");
-
-const Blog = require("./models/blog");
-const userRoute = require("./routes/user");
-const blogRoute = require("./routes/blog");
-
-const {
-  checkForAuthenticationCookie,
-} = require("./middlewares/authentication");
+const path = require("path");
+require("dotenv").config();
 
 const app = express();
 
-const PORT = process.env.PORT || 8000;
+// Routes
+const userRoutes = require("./routes/user");
+const blogRoutes = require("./routes/blog");
+
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.use(express.static(path.join(__dirname, "public")));
+
+// View Engine
+app.set("view engine", "ejs");
 
 // MongoDB Connection
 mongoose
@@ -24,53 +25,28 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log("Mongo Error:", err));
+  .catch((err) => console.log(err));
 
-// View Engine
-app.set("view engine", "ejs");
-app.set("views", path.resolve("./views"));
-
-// Middlewares
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-app.use(cookieParser());
-
-app.use(checkForAuthenticationCookie("token"));
-
-app.use(express.static(path.resolve("./public")));
+// Routes
+app.use("/", userRoutes);
+app.use("/", blogRoutes);
 
 // Home Route
 app.get("/", async (req, res) => {
   try {
-    const allBlogs = await Blog.find({})
-      .sort({ createdAt: -1 })
-      .populate("createdBy");
+    const Blog = require("./models/blog");
+    const blogs = await Blog.find().sort({ createdAt: -1 });
 
-    return res.render("home", {
-      user: req.user,
-      blogs: allBlogs,
-    });
+    res.render("home", { blogs });
   } catch (error) {
     console.log(error);
-    return res.status(500).send("Server Error");
+    res.send("Server Error");
   }
 });
 
-// Routes
-app.use("/user", userRoute);
-app.use("/blog", blogRoute);
+// PORT
+const PORT = process.env.PORT || 3000;
 
-// 404 Route
-app.use((req, res) => {
-  res.status(404).send("Page Not Found");
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-// Start Server
-if (require.main === module) {
-  app.listen(PORT, () =>
-    console.log(`Server Started at PORT:${PORT}`)
-  );
-}
-
-module.exports = app;
