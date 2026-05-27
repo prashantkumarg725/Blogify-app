@@ -1,58 +1,24 @@
 const express = require("express");
-const path = require("path");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
 const app = express();
 
-// Routes
-const userRoutes = require("./routes/user");
-const blogRoutes = require("./routes/blog");
-
-// Middleware
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
-
-// View Engine
-app.set("view engine", "ejs");
-
 // MongoDB Connection
-mongoose.set("strictQuery", false);
-
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => {
-    console.log("MongoDB Connected Successfully");
-  })
-  .catch((err) => {
-    console.log("MongoDB Error:", err);
-  });
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log(err));
 
 // Routes
-app.use("/", userRoutes);
-app.use("/", blogRoutes);
-
-// Home Route
-app.get("/", async (req, res) => {
-  try {
-    const Blog = require("./models/blog");
-
-    const blogs = await Blog.find().sort({
-      createdAt: -1,
-    });
-
-    res.render("home", { blogs });
-  } catch (error) {
-    console.log(error);
-    res.send("Server Error");
-  }
+app.get("/", (req, res) => {
+  res.send("Blogify Backend Running");
 });
 
-// PORT
+// Port
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
