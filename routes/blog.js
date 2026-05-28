@@ -37,11 +37,17 @@ router.post("/", restrictToLoggedInUserOnly, upload.single("coverImage"), async 
   const averageWPM = 200;
   const timeToRead = Math.ceil(wordCount / averageWPM);
 
+  // Agar image hai toh use karo, nahi toh default empty string
+  let coverImageURL = "";
+  if (req.file) {
+    coverImageURL = req.file.path;
+  }
+
   const blog = await Blog.create({
     body,
     title,
     createdBy: req.user._id,
-    coverImageURL: req.file.path,
+    coverImageURL: coverImageURL,
     readingTime: `${timeToRead} min read`,
   });
   return res.redirect(`/blog/${blog._id}`);

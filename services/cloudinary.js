@@ -12,7 +12,7 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'blogify',
-        allowed_formats: ['png', 'jpg', 'jpeg', 'gif'],
+        allowed_formats: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
     },
 });
 
